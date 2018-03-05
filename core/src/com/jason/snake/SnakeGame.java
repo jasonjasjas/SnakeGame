@@ -20,6 +20,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -45,6 +47,9 @@ public class SnakeGame extends ApplicationAdapter {
 
 	int time = 0;
 	int speed = 1;
+
+    FileWriter fileWriter;
+    BufferedWriter bufferedWriter;
 	
 	@Override
 	public void create () {
@@ -73,7 +78,7 @@ public class SnakeGame extends ApplicationAdapter {
         fastForward.addListener(new ChangeListener() {
             public void changed (ChangeEvent event, Actor actor) {
                 if(fastForward.isChecked()){
-                    speed = 30;
+                    speed = 300;
                 }else{
                     speed = 1;
                 }
@@ -106,15 +111,6 @@ public class SnakeGame extends ApplicationAdapter {
 
             if (time == 0) {
                 //keyboardcontrol();
-//                genetic.population.players[genetic.currentPlayer].inputNeurons[0] = (double) snake.getBodyDistanceAhead() / 19;
-//                genetic.population.players[genetic.currentPlayer].inputNeurons[1] = (double) snake.getBodyDistanceLeft() / 19;
-//                genetic.population.players[genetic.currentPlayer].inputNeurons[2] = (double) snake.getBodyDistanceRight() / 19;
-//                genetic.population.players[genetic.currentPlayer].inputNeurons[3] = (double) snake.getWallDistanceAhead() / 19;
-//                genetic.population.players[genetic.currentPlayer].inputNeurons[4] = (double) snake.getWallDistanceLeft() / 19;
-//                genetic.population.players[genetic.currentPlayer].inputNeurons[5] = (double) snake.getWallDistanceRight() / 19;
-//                genetic.population.players[genetic.currentPlayer].inputNeurons[6] = (double) snake.getFoodDistanceAhead(controller.food) / 19;
-//                genetic.population.players[genetic.currentPlayer].inputNeurons[7] = (double) snake.getFoodDistanceLeft(controller.food) / 19;
-//                genetic.population.players[genetic.currentPlayer].inputNeurons[8] = (double) snake.getFoodDistanceRight(controller.food) / 19;
 
                 genetic.population.players[genetic.currentPlayer].inputNeurons[0] = snake.getBodyAhead();
                 genetic.population.players[genetic.currentPlayer].inputNeurons[1] = snake.getBodyLeft();
@@ -140,6 +136,14 @@ public class SnakeGame extends ApplicationAdapter {
                 }
 
 
+
+
+
+
+                double distance = snake.distanceToFood(controller.food);
+
+                snake.move();
+
                 if ((snake.blocks[0].x == controller.food.x) && (snake.blocks[0].y == controller.food.y)) {
                     controller.food.relocate();
                     for (int i = 0; i < snake.length; i++) {
@@ -153,10 +157,6 @@ public class SnakeGame extends ApplicationAdapter {
                     snake.increaseLength();
                 }
 
-                double distance = snake.distanceToFood(controller.food);
-
-                snake.move();
-
                 if(distance > snake.distanceToFood(controller.food)){
                     controller.score += 2;
                 }else{
@@ -164,6 +164,10 @@ public class SnakeGame extends ApplicationAdapter {
                 }
                 if (controller.score > controller.highscore) {
                     controller.highscore = controller.score;
+                }
+
+                if(controller.score +300 < controller.highscore){
+                    snake.alive = false;
                 }
 
                 for (int i = 0; i < snake.length; i++) {
@@ -264,6 +268,17 @@ public class SnakeGame extends ApplicationAdapter {
 
     public void restartGame(){
         genetic.population.players[genetic.currentPlayer].fitness = controller.highscore;
+
+        try{
+            fileWriter = new FileWriter("Genetic.txt",true);
+            bufferedWriter = new BufferedWriter(fileWriter);
+            bufferedWriter.write(genetic.generation+" "+genetic.population.players[genetic.currentPlayer].fitness );
+            bufferedWriter.newLine();
+            bufferedWriter.close();
+        }catch (Exception e){
+            e.printStackTrace();
+
+        }
         genetic.currentPlayer++;
         if (genetic.currentPlayer == genetic.popSize) {
             genetic.generation++;

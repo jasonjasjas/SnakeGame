@@ -5,6 +5,7 @@ public class Snake {
     int hunger;
     boolean alive;
     Block[] blocks;
+    Block lastBlock;
     Snake(){
         length = 4;
         alive = true;
@@ -14,24 +15,17 @@ public class Snake {
         blocks[1] = new Block(10,9,Direction.NORTH);
         blocks[2] = new Block(10,8,Direction.NORTH);
         blocks[3] = new Block(10,7,Direction.NORTH);
+        lastBlock = new Block( blocks[length-1].x, blocks[length-1].y, blocks[length-1].direction);
     }
 
     void increaseLength(){
-        int x = blocks[length-1].x;
-        int y = blocks[length-1].y;
-        Direction direction = blocks[length-1].direction;
-        switch(direction){
-            case NORTH:y--;break;
-            case EAST:x--;break;
-            case SOUTH:y++;break;
-            case WEST:x++;break;
-        }
-        blocks[length] = new Block(x,y,direction);
+        blocks[length] = new Block(lastBlock.x,lastBlock.y,lastBlock.direction);
         length++;
     }
 
     void move(){
         if(alive){
+            lastBlock = new Block(blocks[length-1].x,blocks[length-1].y,blocks[length-1].direction);
             for (int i = length-1; i > 0; i--) {
                 blocks[i].x = blocks[i-1].x;
                 blocks[i].y = blocks[i-1].y;
@@ -79,10 +73,10 @@ public class Snake {
                 blocks[0].direction = Direction.SOUTH;
                 break;
             case WEST:
-                blocks[0].direction = Direction.WEST;
+                blocks[0].direction = Direction.NORTH;
                 break;
             case SOUTH:
-                blocks[0].direction = Direction.SOUTH;
+                blocks[0].direction = Direction.WEST;
                 break;
         }
     }
