@@ -20,9 +20,9 @@ public class QLearn{
     double errOut[] = new double[outputSize];
     double errHidden[] = new double[hiddenSize];
 
-    double learnRate = 0.01;
-    double discountFactor = 0.9;
-    int epoch = 0;
+    double learnRate = 0.001;
+    double discountFactor = 0.95;
+    int epoch = 1;
 
     Boolean newState = true;
 

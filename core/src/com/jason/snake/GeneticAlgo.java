@@ -8,7 +8,7 @@ public class GeneticAlgo {
 
     private static final double uniformRate = 0.5;
     private static final double mutationRate = 0.03;
-    private static final int tournamentSize = 20;
+    private static final int tournamentSize = 30;
     private static final boolean elitism = true;
 
     static int inputSize = 6;

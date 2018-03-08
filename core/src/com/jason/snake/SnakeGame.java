@@ -35,6 +35,8 @@ public class SnakeGame extends ApplicationAdapter {
     Table table;
     Stage stage;
 
+    int counter = 1;
+
 
 
 
@@ -53,6 +55,15 @@ public class SnakeGame extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
+        System.out.println(counter);
+        if(counter == 31){
+            Gdx.app.exit();
+        }
+
+        counter++;
+
+
+
 	    controller = new GameController();
 	    snake = new Snake();
 	    genetic = new GeneticAlgo();
@@ -98,16 +109,16 @@ public class SnakeGame extends ApplicationAdapter {
             Gdx.gl.glClearColor(1, 1, 1, 1);
             Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
             batch.setProjectionMatrix(camera.combined);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.setColor(Color.GRAY);
-            shapeRenderer.rect(0, 0, 500, 500);
-            shapeRenderer.setColor(Color.RED);
-            shapeRenderer.rect(controller.food.x * 25, controller.food.y * 25, 24, 24);
-            shapeRenderer.setColor(Color.BLACK);
-            for (int i = 0; i < snake.length; i++) {
-                shapeRenderer.rect(snake.blocks[i].x * 25, snake.blocks[i].y * 25, 24, 24);
-            }
-            shapeRenderer.end();
+//            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+//            shapeRenderer.setColor(Color.GRAY);
+//            shapeRenderer.rect(0, 0, 500, 500);
+//            shapeRenderer.setColor(Color.RED);
+//            shapeRenderer.rect(controller.food.x * 25, controller.food.y * 25, 24, 24);
+//            shapeRenderer.setColor(Color.BLACK);
+//            for (int i = 0; i < snake.length; i++) {
+//                shapeRenderer.rect(snake.blocks[i].x * 25, snake.blocks[i].y * 25, 24, 24);
+//            }
+//            shapeRenderer.end();
 
             if (time == 0) {
                 //keyboardcontrol();
@@ -154,13 +165,14 @@ public class SnakeGame extends ApplicationAdapter {
                     }
 
                     controller.score += 100;
+                    controller.actualscore += 1;
                     snake.increaseLength();
                 }
 
                 if(distance > snake.distanceToFood(controller.food)){
-                    controller.score += 2;
+                    controller.score += 1;
                 }else{
-                    controller.score -= 3;
+                    controller.score -= 2;
                 }
                 if (controller.score > controller.highscore) {
                     controller.highscore = controller.score;
@@ -185,9 +197,13 @@ public class SnakeGame extends ApplicationAdapter {
                     if (controller.highscore > controller.maxscore) {
                         controller.maxscore = controller.highscore;
                     }
+                    if (controller.actualscore > controller.genactualscore) {
+                        controller.genactualscore = controller.actualscore;
+                    }
                     restartGame();
                     Snake s = new Snake();
                     snake = s;
+                    controller.actualscore = 0;
                     controller.score = 0;
                     controller.highscore = 0;
                     controller.food.relocate();
@@ -203,11 +219,13 @@ public class SnakeGame extends ApplicationAdapter {
             }
 
             batch.begin();
-            font.draw(batch, "Score: " + Integer.toString(controller.score), 135, 235);
-            font.draw(batch, "High Score: " + Integer.toString(controller.highscore), 135, 215);
-            font.draw(batch, "Max Score: " + Integer.toString(controller.maxscore), 135, 195);
+
+            font.draw(batch, "Fitness: " + Integer.toString(controller.score), 135, 235);
+            font.draw(batch, "Highest Fitness: " + Integer.toString(controller.highscore), 135, 215);
+            font.draw(batch, "Best Fitness: " + Integer.toString(controller.maxscore), 135, 195);
             font.draw(batch, "Current Player: " + Integer.toString(genetic.currentPlayer), 135, 175);
             font.draw(batch, "Generation: " + Integer.toString(genetic.generation), 135, 155);
+            font.draw(batch, "Generation Score: " + Integer.toString(controller.generationscore), 135, 135);
 
             font.draw(batch, formatter.format(genetic.population.players[genetic.currentPlayer].inputNeurons[0]), 135, 115);
             font.draw(batch, formatter.format(genetic.population.players[genetic.currentPlayer].inputNeurons[1]), 175, 115);
@@ -268,22 +286,27 @@ public class SnakeGame extends ApplicationAdapter {
 
     public void restartGame(){
         genetic.population.players[genetic.currentPlayer].fitness = controller.highscore;
-
-        try{
-            fileWriter = new FileWriter("Genetic.txt",true);
-            bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(genetic.generation+" "+genetic.population.players[genetic.currentPlayer].fitness );
-            bufferedWriter.newLine();
-            bufferedWriter.close();
-        }catch (Exception e){
-            e.printStackTrace();
-
-        }
         genetic.currentPlayer++;
         if (genetic.currentPlayer == genetic.popSize) {
+            try {
+                fileWriter = new FileWriter("BestPopulation2.txt", true);
+                bufferedWriter = new BufferedWriter(fileWriter);
+                bufferedWriter.write(genetic.generation + " " + controller.genactualscore);
+                bufferedWriter.newLine();
+                bufferedWriter.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            controller.generationscore = 0;
+            controller.genactualscore = 0;
             genetic.generation++;
             genetic.currentPlayer = 0;
             genetic.population = genetic.evolvePopulation(genetic.population);
+
+            if(genetic.generation == 301){
+                create();
+            }
         }
     }
 
